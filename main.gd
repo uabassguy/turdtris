@@ -195,7 +195,7 @@ var seq_pool: Array[AudioStreamPlayer] = []
 var seq_stop: Array[float] = []
 var seq_step := 0
 var seq_acc := 0.0
-var cur_song := 1
+var cur_song := 0
 var music_enabled := true
 var music_speed := 1.0          # 1.0 normally, faster while the stack is above 60% height
 var game_type := 0              # 0 = A-type (endless), 1 = B-type (clear GOAL lines)
@@ -449,8 +449,8 @@ func _make_flush() -> AudioStreamWAV:
 
 
 func _build_sounds() -> void:
-	var table := {"plop": _make_plop(), "fart": _make_fart(), "flush": _make_flush(), "lose": _make_long_fart(), "pause": _make_blips([784.0, 659.0, 523.0, 392.0]), "resume": _make_blips([392.0, 523.0, 659.0, 784.0])}
-	var vols := {"plop": -13.0, "fart": -6.0, "flush": -20.0, "lose": -3.0, "pause": -14.0, "resume": -14.0}
+	var table := {"plop": _make_plop(), "fart": _make_fart(), "flush": _make_flush(), "lose": _make_long_fart(), "pause": _make_blips([784.0, 659.0, 523.0, 392.0]), "resume": _make_blips([392.0, 523.0, 659.0, 784.0]), "levelup": _make_blips([659.0, 784.0, 988.0, 1319.0])}
+	var vols := {"plop": -13.0, "fart": -6.0, "flush": -20.0, "lose": -3.0, "pause": -14.0, "resume": -14.0, "levelup": -11.0}
 	for key in table:
 		var p := AudioStreamPlayer.new()
 		p.stream = table[key]
@@ -787,7 +787,10 @@ func finish_clear() -> void:
 	soft_blocked = true   # holding down through a clear must not carry into the next piece
 	score += int(CLEAR_POINTS[n]) * level
 	lines += n
+	var old_level := level
 	level = start_level + int(floor(lines / 10.0))
+	if level > old_level:
+		play_sfx("levelup")
 	clear_rows.clear()
 	high = maxi(high, score)
 	if game_type == 1 and lines >= GOAL:
