@@ -80,8 +80,44 @@ const MEL_KOROBEINIKI := [
 	7, REST, REST, 3, 7, REST, 5, 3,
 	2, REST, 2, 3, 5, REST, 7, REST,
 	3, REST, 0, REST, 0, REST, REST, REST,
+	# A again
+	7, REST, 2, 3, 5, REST, 3, 2,
+	0, REST, 0, 3, 7, REST, 5, 3,
+	2, REST, REST, 3, 5, REST, 7, REST,
+	3, REST, 0, REST, 0, REST, REST, REST,
+	5, REST, REST, 8, 12, REST, 10, 8,
+	7, REST, REST, 3, 7, REST, 5, 3,
+	2, REST, 2, 3, 5, REST, 7, REST,
+	3, REST, 0, REST, 0, REST, REST, REST,
+	# B: the slower, singing second half (long notes, then it comes back around)
+	7, REST, REST, REST, 3, REST, REST, REST,
+	5, REST, REST, REST, 2, REST, REST, REST,
+	3, REST, REST, REST, 0, REST, REST, REST,
+	-1, REST, REST, REST, REST, REST, REST, REST,
+	7, REST, REST, REST, 3, REST, REST, REST,
+	5, REST, REST, REST, 2, REST, REST, REST,
+	3, REST, 7, REST, 12, REST, REST, REST,
+	11, REST, REST, REST, REST, REST, REST, REST,
+	# A once more
+	7, REST, 2, 3, 5, REST, 3, 2,
+	0, REST, 0, 3, 7, REST, 5, 3,
+	2, REST, REST, 3, 5, REST, 7, REST,
+	3, REST, 0, REST, 0, REST, REST, REST,
+	5, REST, REST, 8, 12, REST, 10, 8,
+	7, REST, REST, 3, 7, REST, 5, 3,
+	2, REST, 2, 3, 5, REST, 7, REST,
+	3, REST, 0, REST, 0, REST, REST, REST,
 ]
 const BASS_KOROBEINIKI := [
+	0, 7, 0, 7,   0, 7, 0, 7,   -5, 2, -5, 2,   0, 7, 0, 0,
+	-7, 0, -7, 0,   3, -2, 3, -2,   -5, 2, -5, 2,   0, 7, 0, 0,
+	# A again
+	0, 7, 0, 7,   0, 7, 0, 7,   -5, 2, -5, 2,   0, 7, 0, 0,
+	-7, 0, -7, 0,   3, -2, 3, -2,   -5, 2, -5, 2,   0, 7, 0, 0,
+	# B
+	0, 7, 0, 7,   -5, 2, -5, 2,   0, 7, 0, 7,   -5, 2, -5, 2,
+	0, 7, 0, 7,   -5, 2, -5, 2,   0, 7, 0, 7,   -5, 2, 0, 0,
+	# A once more
 	0, 7, 0, 7,   0, 7, 0, 7,   -5, 2, -5, 2,   0, 7, 0, 0,
 	-7, 0, -7, 0,   3, -2, 3, -2,   -5, 2, -5, 2,   0, 7, 0, 0,
 ]
@@ -140,6 +176,7 @@ var clear_timer := 0.0
 var popup_text := ""
 var popup_timer := 0.0
 var shake := 0.0
+var puffs: Array = []   # little fart clouds around a new piece: {pos, vel, age, life, size}
 var time := 0.0
 
 const turd_mode := true
@@ -158,7 +195,7 @@ var seq_pool: Array[AudioStreamPlayer] = []
 var seq_stop: Array[float] = []
 var seq_step := 0
 var seq_acc := 0.0
-var cur_song := 0
+var cur_song := 1
 var music_enabled := true
 var music_speed := 1.0          # 1.0 normally, faster while the stack is above 60% height
 var game_type := 0              # 0 = A-type (endless), 1 = B-type (clear GOAL lines)
@@ -284,6 +321,25 @@ func _make_plop() -> AudioStreamWAV:
 	return _make_wav(s, rate)
 
 
+# A tiny bell jingle: falling arpeggio = pause, rising = resume
+func _make_blips(freqs: Array) -> AudioStreamWAV:
+	var rate := 22050
+	var per := int(rate * 0.11)
+	var tail := int(rate * 0.25)
+	var s := PackedFloat32Array()
+	s.resize(per * (freqs.size() - 1) + tail)
+	for k in freqs.size():
+		var f: float = freqs[k]
+		for i in tail:
+			var t := float(i) / rate
+			var env := minf(1.0, t * 500.0) * exp(-t * 11.0)
+			var v := (sin(TAU * f * t) + 0.3 * sin(TAU * f * 2.0 * t) + 0.12 * sin(TAU * f * 3.0 * t)) * env * 0.45
+			var idx := k * per + i
+			if idx < s.size():
+				s[idx] += v
+	return _make_wav(s, rate)
+
+
 func _make_music(song: Dictionary) -> AudioStreamWAV:
 	# Plays a song on a fart synth + thumpy bass (used when there is no fart sample).
 	var rate := 22050
@@ -393,8 +449,8 @@ func _make_flush() -> AudioStreamWAV:
 
 
 func _build_sounds() -> void:
-	var table := {"plop": _make_plop(), "fart": _make_fart(), "flush": _make_flush(), "lose": _make_long_fart()}
-	var vols := {"plop": -13.0, "fart": -6.0, "flush": -20.0, "lose": -3.0}
+	var table := {"plop": _make_plop(), "fart": _make_fart(), "flush": _make_flush(), "lose": _make_long_fart(), "pause": _make_blips([784.0, 659.0, 523.0, 392.0]), "resume": _make_blips([392.0, 523.0, 659.0, 784.0])}
+	var vols := {"plop": -13.0, "fart": -6.0, "flush": -20.0, "lose": -3.0, "pause": -14.0, "resume": -14.0}
 	for key in table:
 		var p := AudioStreamPlayer.new()
 		p.stream = table[key]
@@ -579,7 +635,22 @@ func spawn_piece(type: int) -> void:
 	if not fits(cur_type, cur_rot, cur_pos):
 		game_over()
 	else:
-		play_sfx("fart", randf_range(0.85, 1.2))   # every new piece announces itself
+		play_sfx("fart", randf_range(1.6, 2.0))   # every new piece announces itself, high and squeaky
+		_spawn_puffs()
+
+
+func _spawn_puffs() -> void:
+	for c in piece_cells(cur_type, cur_rot):
+		var centre := BOARD_POS + (Vector2(cur_pos + c) + Vector2(0.5, 0.5)) * CELL
+		for k in 3:
+			var dir := Vector2.from_angle(randf() * TAU)
+			puffs.append({
+				"pos": centre + dir * randf_range(8.0, 20.0),
+				"vel": dir * randf_range(25.0, 70.0) + Vector2(0, -12),
+				"age": 0.0,
+				"life": randf_range(0.45, 0.8),
+				"size": randf_range(7.0, 13.0),
+			})
 
 
 func spawn_next() -> void:
@@ -780,6 +851,7 @@ func _menu_key(k: int) -> bool:
 func _toggle_pause() -> void:
 	if state == State.PLAYING:
 		state = State.PAUSED
+		play_sfx("pause")
 		pause_row = 0          # RESUME is the default
 		pause_confirm = false
 	elif state == State.PAUSED:
@@ -788,6 +860,7 @@ func _toggle_pause() -> void:
 			pause_row = 1
 		else:
 			state = State.PLAYING
+			play_sfx("resume")
 
 
 func pause_move(d: int) -> void:
@@ -798,6 +871,7 @@ func _pause_select() -> void:
 	if not pause_confirm:
 		if pause_row == 0:
 			state = State.PLAYING
+			play_sfx("resume")
 		else:
 			pause_confirm = true
 			pause_row = 0      # NO is the default answer
@@ -815,6 +889,18 @@ func quit_to_title() -> void:
 	_stop_seq()
 	pause_confirm = false
 	pause_row = 0
+	board.fill(-1)
+	ids.fill(-1)
+	cur_type = -1
+	meld_t = 0.0
+	clog_progress = 0.0
+	clear_rows.clear()
+	popup_timer = 0.0
+	puffs.clear()
+	score = 0
+	lines = 0
+	level = start_level
+	won = false
 	state = State.TITLE
 
 
@@ -989,6 +1075,13 @@ func _process(delta: float) -> void:
 	shake = move_toward(shake, 0.0, delta * 30.0)
 	popup_timer = maxf(0.0, popup_timer - delta)
 	meld_t = maxf(0.0, meld_t - delta)
+	for i in range(puffs.size() - 1, -1, -1):
+		var pf: Dictionary = puffs[i]
+		pf["age"] = float(pf["age"]) + delta
+		pf["pos"] = (pf["pos"] as Vector2) + (pf["vel"] as Vector2) * delta
+		pf["vel"] = (pf["vel"] as Vector2) * (1.0 - 2.5 * delta)
+		if float(pf["age"]) >= float(pf["life"]):
+			puffs.remove_at(i)
 	if state == State.OVER and not won:
 		clog_progress = minf(float(ROWS) + 4.0, clog_progress + delta * 14.0)
 	music.stream_paused = (state == State.PAUSED)
@@ -1113,6 +1206,12 @@ func _draw() -> void:
 	_draw_overlays()
 	if turd_mode:
 		_draw_butt_layer()   # on top of everything in the well: pieces, dimming, pause and title boxes
+	for pf in puffs:
+		var u := float(pf["age"]) / float(pf["life"])
+		var r := float(pf["size"]) * (0.6 + 0.9 * u)
+		var a := 0.55 * (1.0 - u)
+		draw_circle(pf["pos"], r, Color(0.62, 0.68, 0.3, a))
+		draw_circle((pf["pos"] as Vector2) + Vector2(-r * 0.25, -r * 0.25), r * 0.55, Color(0.82, 0.86, 0.5, a * 0.8))
 
 
 func _text_a(s: String, pos: Vector2, size: int, col: Color, w: float, align: HorizontalAlignment) -> void:
@@ -1288,13 +1387,6 @@ func _draw_well() -> void:
 
 	# ghost + active piece
 	if state == State.PLAYING or state == State.PAUSED:
-		var gp := ghost_pos()
-		var gcol: Color = TURD_COLORS[cur_type] if turd_mode else CLASSIC_COLORS[cur_type]
-		gcol.a = 0.55
-		for c in piece_cells(cur_type, cur_rot):
-			if SHOW_GHOST and gp.y + c.y >= 0:
-				var o := BOARD_POS + Vector2(gp.x + c.x, gp.y + c.y) * CELL
-				draw_rect(Rect2(o, Vector2(CELL, CELL)).grow(-4.0), gcol, false, 2.0)
 		for c in piece_cells(cur_type, cur_rot):
 			if cur_pos.y + c.y >= 0:
 				var o := BOARD_POS + Vector2(cur_pos.x + c.x, cur_pos.y + c.y) * CELL
@@ -1316,6 +1408,17 @@ func _draw_well() -> void:
 		pts.append_array(_round_poly(well, 30.0, 56.0, 14).slice(14, 42))   # follow the rounded bottom corners
 		draw_colored_polygon(pts, Color(0.25, 0.5, 0.85, 0.30))
 		draw_polyline(surface, Color(0.7, 0.9, 1.0, 0.45), 2.0)
+
+	# piece hint (ghost) sits over the water so it stays visible
+	if SHOW_GHOST and (state == State.PLAYING or state == State.PAUSED):
+		var gp2 := ghost_pos()
+		var gcol2: Color = TURD_COLORS[cur_type] if turd_mode else CLASSIC_COLORS[cur_type]
+		gcol2 = gcol2.lightened(0.25)
+		gcol2.a = 0.8
+		for c in piece_cells(cur_type, cur_rot):
+			if gp2.y + c.y >= 0:
+				var o2 := BOARD_POS + Vector2(gp2.x + c.x, gp2.y + c.y) * CELL
+				draw_rect(Rect2(o2, Vector2(CELL, CELL)).grow(-4.0), gcol2, false, 2.0)
 
 	# FLUSH animation over cleared rows
 	if state == State.CLEARING:

@@ -24,10 +24,11 @@ jobs:
 
       - name: Export
         run: |
-          mkdir -p build/windows build/linux
+          mkdir -p build/windows build/linux build/mac
           godot --headless --import || true
           godot --headless --export-release "Windows Desktop" build/windows/Turdtris.exe
           godot --headless --export-release "Linux" build/linux/Turdtris.x86_64
+          godot --headless --export-release "macOS" build/mac/Turdtris-macOS.zip
           chmod +x build/linux/Turdtris.x86_64
 
       - name: Check the exe is a single file
@@ -68,6 +69,11 @@ jobs:
           name: turdtris-linux
           path: build/Turdtris-x86_64.AppImage
 
+      - uses: actions/upload-artifact@v5
+        with:
+          name: turdtris-macos
+          path: build/mac/Turdtris-macOS.zip
+
       - name: Attach to the GitHub release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
@@ -75,3 +81,4 @@ jobs:
           files: |
             build/windows/Turdtris.exe
             build/Turdtris-x86_64.AppImage
+            build/mac/Turdtris-macOS.zip
