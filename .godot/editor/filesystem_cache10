@@ -1,0 +1,11 @@
+78098b89c88a74ebe8c20117b8754620
+::res://::1795683685
+main.gd::GDScript::1363496779354240705::1795683685::0::1::::<>Node2D<><>0<>0<><>::
+main.tscn::PackedScene::5815828976120955386::1795674369::0::1::::<><><>0<>0<><>::uid://toqufhkuyso4::::res://main.gd
+README.md::TextFile::-1::1795680650::0::1::::<><><>0<>0<><>::
+::res://assets/::1795683679
+background.png::CompressedTexture2D::2046944040348153533::1795683679::1795683689::1::::<><><>0<>0<>ee38fc53ff7eb27f507c33a1485e0a04<>res://.godot/imported/background.png-1fdba8b6a966ce2c2ffc607f7c096e95.ctex::
+butt.png::CompressedTexture2D::5548213738090852133::1795682721::1795682729::1::::<><><>0<>0<>42876bb2cf58771757fdf8bb93b9f9c0<>res://.godot/imported/butt.png-ab2388256a167bbd2446eb17dd619dc1.ctex::
+README.txt::TextFile::-1::1795666722::0::1::::<><><>0<>0<><>::
+::res://assets/sounds/::1795680523
+fart.mp3::AudioStreamMP3::3111969462017734229::1795673428::1795673434::1::::<><><>0<>0<>1ffe266135a93b92f3156fd59624bf86<>res://.godot/imported/fart.mp3-9873c798c4092966a236639dab1b5e76.mp3str::
