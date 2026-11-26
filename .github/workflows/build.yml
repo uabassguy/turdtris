@@ -7,6 +7,8 @@ on:
 jobs:
   export:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to attach files to a release
     container:
       image: barichello/godot-ci:4.7   # check Docker Hub for the exact tag you use
     steps:
@@ -28,18 +30,48 @@ jobs:
           godot --headless --export-release "Linux" build/linux/Turdtris.x86_64
           chmod +x build/linux/Turdtris.x86_64
 
-      - name: Zip
+      - name: Check the exe is a single file
         run: |
-          apt-get update -qq && apt-get install -y -qq zip > /dev/null || true
-          (cd build/windows && zip -r ../Turdtris-windows.zip .)
-          (cd build/linux && zip -r ../Turdtris-linux.zip .)
+          if [ -f build/windows/Turdtris.pck ]; then
+            echo "Turn on 'Embed PCK' in the Windows Desktop export preset, then commit export_presets.cfg"
+            exit 1
+          fi
+
+      - name: Build the AppImage
+        run: |
+          apt-get update -qq && apt-get install -y -qq wget file > /dev/null || true
+          wget -q https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x appimagetool
+          mkdir -p AppDir/usr/bin
+          cp build/linux/Turdtris.x86_64 AppDir/usr/bin/Turdtris.x86_64
+          cp build/linux/*.pck AppDir/usr/bin/ 2>/dev/null || true
+          cp icon.png AppDir/turdtris.png
+          cat > AppDir/turdtris.desktop <<'EOF'
+          [Desktop Entry]
+          Type=Application
+          Name=Turdtris
+          Exec=Turdtris.x86_64
+          Icon=turdtris
+          Categories=Game;
+          EOF
+          printf '#!/bin/sh\nHERE="$(dirname "$(readlink -f "$0")")"\nexec "$HERE/usr/bin/Turdtris.x86_64" "$@"\n' > AppDir/AppRun
+          chmod +x AppDir/AppRun
+          ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir build/Turdtris-x86_64.AppImage
 
       - uses: actions/upload-artifact@v5
         with:
           name: turdtris-windows
-          path: build/Turdtris-windows.zip
+          path: build/windows/Turdtris.exe
 
       - uses: actions/upload-artifact@v5
         with:
           name: turdtris-linux
-          path: build/Turdtris-linux.zip
+          path: build/Turdtris-x86_64.AppImage
+
+      - name: Attach to the GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/windows/Turdtris.exe
+            build/Turdtris-x86_64.AppImage
