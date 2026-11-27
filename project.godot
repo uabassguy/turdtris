@@ -10,9 +10,12 @@ config_version=5
 
 [application]
 
-config/name="Turdtris"
+config/name="Turdtris: Call of Doody"
 run/main_scene="res://main.tscn"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="Turdtris"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://icon.png"
 
 [display]
 

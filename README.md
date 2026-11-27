@@ -1,4 +1,4 @@
-# Turdtris
+# Turdtris: Call of Doody
 
 A Game Boy-style Tetris clone: a porcelain toilet for a well, turds for pieces,
 farts for music, and a giant butt dropping each piece. Godot 4.7, GDScript, one script (`main.gd`).

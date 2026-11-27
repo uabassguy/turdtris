@@ -1,5 +1,5 @@
 extends Node2D
-## TURDTRIS - Tetris, but the well is a toilet bowl and the pieces are turds.
+## TURDTRIS: CALL OF DOODY - Tetris, but the well is a toilet bowl and the pieces are turds.
 ## Everything is drawn / synthesised in code, so it runs with zero imported assets.
 ## Drop PNGs in res://assets/ to re-skin it (see assets/README.txt).
 
@@ -54,7 +54,7 @@ const CLASSIC_COLORS := [
 const REST := -99
 # Songs are semitones above the sample's own pitch (REST = silence), one entry per step,
 # staccato (a long note = the note followed by RESTs). Bass: one note per two steps.
-# Press 1 / 2 / 3 to switch (controller: Back button cycles).
+# Press 1 / 2 / 3 / 4 to switch (controller: Back button cycles).
 
 # 1: original tune, parts A and B
 const MEL_FANFARE := [
@@ -138,10 +138,86 @@ const BASS_MINUET := [
 	7, 14, 14,   0, 7, 7,   7, 14, 14,   0, 7, 0,
 ]
 
+# Title / setup-screen theme (original): slow, smoky and a little sly, a lounge groove in A minor
+# with a walking bass, instead of a cheery fanfare. Semitones above the sample's pitch, A = 0.
+const MEL_TITLE := [
+	7, REST, REST, 10, 12, REST, 10, REST,
+	8, REST, REST, 5, 8, REST, 12, REST,
+	7, REST, 2, REST, 7, REST, 11, REST,
+	12, REST, REST, REST, REST, REST, REST, REST,
+	8, REST, REST, 12, 15, REST, 12, REST,
+	14, REST, 10, REST, 5, REST, 10, REST,
+	15, REST, 12, REST, 11, REST, 7, REST,
+	12, REST, REST, REST, REST, REST, REST, REST,
+]
+const BASS_TITLE := [
+	0, 3, 7, 3,   5, 8, 12, 8,   7, 11, 14, 11,   0, 3, 7, 10,
+	5, 8, 12, 8,   10, 14, 17, 14,   3, 7, 7, 11,   0, 7, 0, 7,
+]
+const TITLE_SONG := {"name": "Title", "mel": MEL_TITLE, "bass": BASS_TITLE, "step": 0.23}
+
+# 4: "Loose Groove" (original, inspired by the form of a classic relaxed puzzle theme): 24 bars of A minor at 130 BPM,
+# sixteenth-note steps. Shape: Am vamp x2, a root walk-down (A G F# F), a higher Am hook, a D / G lift,
+# a G# tension bar and a C - D turnaround. The tune itself is new.
+# Semitones above the sample's pitch, A = 0 (C = 3, E = 7, G = 10, high A = 12, high C = 15).
+const MEL_CHILL := [
+	12, REST, 15, REST, 14, 12, REST, 7, 10, REST, REST, REST, 7, REST, REST, REST,
+	12, REST, 15, REST, 14, 12, REST, 17, 15, REST, REST, REST, REST, REST, REST, REST,
+	12, REST, 15, REST, 14, 12, REST, 7, 10, REST, 12, REST, 14, REST, 15, REST,
+	19, REST, REST, 17, 15, REST, 14, REST, 12, REST, REST, REST, REST, REST, REST, REST,
+	7, REST, 10, REST, 12, REST, 10, 7, 12, REST, REST, REST, 10, REST, 7, REST,
+	7, REST, 10, REST, 12, REST, 14, REST, 15, REST, REST, REST, REST, REST, REST, REST,
+	7, REST, 10, REST, 12, REST, 10, 7, 12, REST, 15, REST, 17, REST, 15, REST,
+	14, REST, 12, REST, 10, REST, 7, REST, 12, REST, REST, REST, REST, REST, REST, REST,
+	12, REST, REST, 15, REST, REST, 12, REST, 14, REST, REST, REST, REST, REST, REST, REST,
+	10, REST, REST, 14, REST, REST, 10, REST, 12, REST, REST, REST, REST, REST, REST, REST,
+	9, REST, REST, 12, REST, REST, 9, REST, 11, REST, REST, REST, REST, REST, REST, REST,
+	8, REST, REST, 12, REST, REST, 8, REST, 10, REST, 11, REST, 14, REST, REST, REST,
+	19, REST, REST, 17, REST, 15, REST, 14, 15, REST, REST, REST, 12, REST, REST, REST,
+	14, REST, 15, REST, 17, REST, 15, REST, 14, REST, REST, REST, REST, REST, REST, REST,
+	19, REST, REST, 17, REST, 15, REST, 14, 15, REST, 17, REST, 19, REST, REST, REST,
+	17, REST, 15, REST, 14, REST, 12, REST, 7, REST, REST, REST, REST, REST, REST, REST,
+	14, REST, REST, 17, REST, REST, 14, REST, 12, REST, REST, REST, REST, REST, REST, REST,
+	14, REST, REST, 17, REST, REST, 19, REST, 17, REST, REST, REST, REST, REST, REST, REST,
+	14, REST, REST, 17, REST, REST, 14, REST, 15, REST, REST, REST, 12, REST, REST, REST,
+	17, REST, 15, REST, 14, REST, 10, REST, 12, REST, REST, REST, REST, REST, REST, REST,
+	12, REST, REST, REST, 11, REST, REST, REST, 12, REST, REST, REST, 14, REST, REST, REST,
+	15, REST, REST, REST, 14, REST, 11, REST, 12, REST, REST, REST, REST, REST, REST, REST,
+	15, REST, REST, 12, REST, REST, 15, REST, 17, REST, REST, REST, REST, REST, REST, REST,
+	17, REST, REST, 14, REST, REST, 17, REST, 19, REST, REST, REST, 12, REST, REST, REST,
+]
+const BASS_CHILL := [
+	0, 12, 0, 7, 0, 12, 0, 7,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	10, 10, 10, 5, 10, 10, 10, 5,
+	9, 9, 9, 4, 9, 9, 9, 4,
+	8, 8, 8, 3, 8, 8, 8, 3,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	5, 5, 5, 12, 5, 5, 5, 12,
+	10, 10, 10, 5, 10, 10, 10, 5,
+	5, 5, 5, 12, 5, 5, 5, 12,
+	10, 10, 10, 5, 10, 10, 10, 5,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	0, 12, 0, 7, 0, 12, 0, 7,
+	3, 3, 3, 10, 3, 3, 3, 10,
+	5, 5, 5, 12, 5, 5, 5, 12,
+]
+
 const SONGS := [
 	{"name": "Fart Fanfare", "mel": MEL_FANFARE, "bass": BASS_FANFARE, "step": 0.2},
 	{"name": "Korobeiniki", "mel": MEL_KOROBEINIKI, "bass": BASS_KOROBEINIKI, "step": 0.19},
-	{"name": "Minuet in G", "mel": MEL_MINUET, "bass": BASS_MINUET, "step": 0.2},
+	{"name": "Brownsleeves", "mel": MEL_MINUET, "bass": BASS_MINUET, "step": 0.2},
+	{"name": "Loose Groove", "mel": MEL_CHILL, "bass": BASS_CHILL, "step": 0.115},
 ]
 const FART_PITCH_OFFSET := -7.0   # shifts the whole tune; tweak if your sample sounds too high / low
 const CLEAR_NAMES := ["", "PLOP!", "DOUBLE DUMP!", "TRIPLE LOG JAM!", "SHITRIS!!!"]
@@ -202,9 +278,12 @@ var game_type := 0              # 0 = A-type (endless), 1 = B-type (clear GOAL l
 var start_level := 1
 var start_height := 0           # B-type: starting garbage, height x 2 rows
 var menu_row := 0
+var instant_drop := false      # setup-menu option: Up / D-pad up drops the piece instantly
 var won := false
 var pause_row := 0               # pause menu: 0 = RESUME / NO (the defaults), 1 = RETURN TO TITLE / YES
 var pause_confirm := false      # "are you sure?" step before leaving to the title
+var win_t := 0.0                 # seconds since the win screen started (drives the rocket)
+var launched := false
 var clog_progress := 0.0        # rows of poo that have flooded in from the bottom after losing
 var song_streams := {}
 
@@ -218,6 +297,8 @@ func _toggle_fullscreen() -> void:
 
 
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST   # crisp pixel art
+	_build_font()
 	randomize()
 	if START_FULLSCREEN:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
@@ -276,12 +357,15 @@ func _load_high() -> void:
 		var f := FileAccess.open(SAVE_PATH, FileAccess.READ)
 		if f:
 			high = f.get_32()
+			if f.get_position() < f.get_length():   # older save files have only the high score
+				instant_drop = f.get_8() == 1
 
 
 func _save_high() -> void:
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f:
 		f.store_32(high)
+		f.store_8(1 if instant_drop else 0)
 
 
 # ------------------------------------------------------------------ sound
@@ -430,6 +514,22 @@ func _make_long_fart() -> AudioStreamWAV:
 	return _make_wav(s, rate)
 
 
+func _make_launch() -> AudioStreamWAV:
+	var rate := 22050
+	var n := int(rate * 3.2)
+	var s := PackedFloat32Array()
+	s.resize(n)
+	var lp := 0.0
+	var ph := 0.0
+	for i in n:
+		var t := float(i) / rate
+		lp += (0.12 + 0.1 * minf(t, 1.5)) * ((randf() * 2.0 - 1.0) - lp)   # rumble that brightens as it climbs
+		var env := minf(1.0, t * 6.0) * (1.0 if t < 2.2 else maxf(0.0, 1.0 - (t - 2.2)))
+		ph += TAU * (45.0 + 70.0 * t) / rate
+		s[i] = (lp * 1.4 + sin(ph) * 0.45) * env * 0.8
+	return _make_wav(s, rate)
+
+
 func _make_flush() -> AudioStreamWAV:
 	var rate := 22050
 	var dur := 1.4
@@ -449,8 +549,8 @@ func _make_flush() -> AudioStreamWAV:
 
 
 func _build_sounds() -> void:
-	var table := {"plop": _make_plop(), "fart": _make_fart(), "flush": _make_flush(), "lose": _make_long_fart(), "pause": _make_blips([784.0, 659.0, 523.0, 392.0]), "resume": _make_blips([392.0, 523.0, 659.0, 784.0]), "levelup": _make_blips([659.0, 784.0, 988.0, 1319.0])}
-	var vols := {"plop": -13.0, "fart": -6.0, "flush": -20.0, "lose": -3.0, "pause": -14.0, "resume": -14.0, "levelup": -11.0}
+	var table := {"plop": _make_plop(), "fart": _make_fart(), "flush": _make_flush(), "lose": _make_long_fart(), "pause": _make_blips([784.0, 659.0, 523.0, 392.0]), "resume": _make_blips([392.0, 523.0, 659.0, 784.0]), "levelup": _make_blips([659.0, 784.0, 988.0, 1319.0]), "launch": _make_launch()}
+	var vols := {"plop": -13.0, "fart": -6.0, "flush": -20.0, "lose": -3.0, "pause": -14.0, "resume": -14.0, "levelup": -11.0, "launch": -17.0}
 	for key in table:
 		var p := AudioStreamPlayer.new()
 		p.stream = table[key]
@@ -496,7 +596,7 @@ func _play_note(semi: float, dur: float, vol: float) -> void:
 
 
 func _seq_tick() -> void:
-	var song: Dictionary = SONGS[cur_song]
+	var song: Dictionary = TITLE_SONG if _in_title() else SONGS[cur_song]
 	var mel: Array = song["mel"]
 	var bass: Array = song["bass"]
 	var step: float = song["step"]
@@ -509,6 +609,25 @@ func _seq_tick() -> void:
 	seq_step += 1
 
 
+func _in_title() -> bool:
+	return state == State.TITLE or state == State.MENU
+
+
+var was_in_title := false
+var title_stream: AudioStreamWAV = null
+
+
+func _start_title_music() -> void:
+	seq_step = 0
+	seq_acc = 0.0
+	_stop_seq()
+	if fart_sample == null and music_enabled:
+		if title_stream == null:
+			title_stream = _make_music(TITLE_SONG)
+		music.stream = title_stream
+		music.play()
+
+
 func _song_stream(i: int) -> AudioStreamWAV:
 	if not song_streams.has(i):
 		song_streams[i] = _make_music(SONGS[i])
@@ -517,7 +636,19 @@ func _song_stream(i: int) -> AudioStreamWAV:
 
 func set_song(i: int) -> void:
 	i = posmod(i, SONGS.size() + 1)   # the last slot is OFF
+	var was_enabled := music_enabled
 	music_enabled = i < SONGS.size()
+	if _in_title():
+		# On the title / setup screens the picked song only matters for the game: the title
+		# theme keeps playing without a restart. (Only OFF / back ON touches it.)
+		if music_enabled:
+			cur_song = i
+			if not was_enabled:
+				_start_title_music()
+		else:
+			music.stop()
+			_stop_seq()
+		return
 	seq_step = 0
 	seq_acc = 0.0
 	_stop_seq()
@@ -526,9 +657,12 @@ func set_song(i: int) -> void:
 		return
 	cur_song = i
 	if fart_sample == null:
-		music.stream = _song_stream(cur_song)
-		if state == State.PLAYING or state == State.CLEARING or state == State.PAUSED:
-			music.play()
+		if _in_title():
+			_start_title_music()
+		else:
+			music.stream = _song_stream(cur_song)
+			if state == State.PLAYING or state == State.CLEARING or state == State.PAUSED:
+				music.play()
 
 
 func _stop_seq() -> void:
@@ -598,6 +732,7 @@ func new_game() -> void:
 	seq_step = 0
 	seq_acc = 0.0
 	if fart_sample == null and music_enabled:
+		music.stream = _song_stream(cur_song)
 		music.play()
 	if game_type == 1 and start_height > 0:
 		_add_garbage(start_height * 2)
@@ -676,6 +811,8 @@ func _defeat_sound() -> void:
 func win() -> void:
 	state = State.OVER
 	won = true
+	win_t = 0.0
+	launched = false
 	high = maxi(high, score)
 	_save_high()
 	music.stop()
@@ -803,6 +940,10 @@ func finish_clear() -> void:
 # ------------------------------------------------------------------ input / update
 
 func _start_or_restart() -> void:
+	# On the win / lose screens the button only works once its "press ..." prompt is showing,
+	# so mashing buttons can't skip the rocket or the clog by accident.
+	if state == State.OVER and ((won and win_t < WIN_PROMPT_AT) or (not won and clog_progress < float(ROWS))):
+		return
 	if state == State.TITLE or state == State.OVER:
 		state = State.MENU
 	elif state == State.MENU:
@@ -814,9 +955,9 @@ func _music_index() -> int:
 
 
 func menu_move(d: int) -> void:
-	menu_row = posmod(menu_row + d, 5)
+	menu_row = posmod(menu_row + d, 6)
 	if menu_row == 2 and game_type == 0:   # HEIGHT only applies to B-type
-		menu_row = posmod(menu_row + d, 5)
+		menu_row = posmod(menu_row + d, 6)
 
 
 func menu_change(d: int) -> void:
@@ -830,6 +971,9 @@ func menu_change(d: int) -> void:
 				start_height = posmod(start_height + d, 6)
 		3:
 			set_song(_music_index() + d)
+		4:
+			instant_drop = not instant_drop
+			_save_high()   # remember the setting
 
 
 func _menu_key(k: int) -> bool:
@@ -934,6 +1078,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	var k: int = event.keycode
 	if k == KEY_NONE:
 		k = event.physical_keycode
+	if k == KEY_F9 and state != State.OVER:   # test key: jump straight to the win screen and the rocket
+		win()
+		return
 	if k == KEY_F11 or (k == KEY_ENTER and event.alt_pressed):
 		_toggle_fullscreen()
 		return
@@ -949,7 +1096,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			_start_or_restart()
 		KEY_P, KEY_ESCAPE:
 			_toggle_pause()
-		KEY_1, KEY_2, KEY_3:
+		KEY_1, KEY_2, KEY_3, KEY_4:
 			set_song(k - KEY_1)
 		_:
 			if state == State.PLAYING:
@@ -980,7 +1127,7 @@ func _p(action: String) -> String:
 			"pause": return "P"
 			"rot": return "X"
 			"rotb": return "Z"
-			"music": return "1 / 2 / 3"
+			"music": return "1 - 4"
 		return action
 	var names := {
 		"xbox": {"confirm": "A", "back": "B", "rot": "A", "rotb": "B", "pause": "Menu", "music": "Select"},
@@ -1027,7 +1174,9 @@ func _pad_button(b: int) -> void:
 			elif state == State.PAUSED:
 				_toggle_pause()
 		JOY_BUTTON_DPAD_UP:
-			if state == State.MENU:
+			if state == State.PLAYING and instant_drop:
+				hard_drop()
+			elif state == State.MENU:
 				menu_move(-1)
 			elif state == State.PAUSED:
 				pause_move(-1)
@@ -1064,8 +1213,21 @@ func _pad_stick() -> Vector2:
 	return best
 
 
+func hard_drop() -> void:
+	if state != State.PLAYING or cur_type < 0:
+		return
+	while fits(cur_type, cur_rot, cur_pos + Vector2i.DOWN):
+		cur_pos += Vector2i.DOWN
+	fall_timer = 0.0
+	shake = maxf(shake, 3.0)
+	lock_piece()
+
+
 func _play_key(k: int) -> void:
 	match k:
+		KEY_UP, KEY_W:
+			if instant_drop:
+				hard_drop()
 		KEY_X:
 			try_rotate(-1)
 		KEY_Z, KEY_CTRL:
@@ -1085,6 +1247,17 @@ func _process(delta: float) -> void:
 		pf["vel"] = (pf["vel"] as Vector2) * (1.0 - 2.5 * delta)
 		if float(pf["age"]) >= float(pf["life"]):
 			puffs.remove_at(i)
+	if state == State.OVER and won:
+		win_t += delta
+		if win_t >= LAUNCH_AT and not launched:
+			launched = true
+			shake = 8.0
+			play_sfx("launch")
+		if win_t >= LAUNCH_AT - 0.6 and _rocket_top() > BOARD_POS.y - 260.0:
+			var nozzle := Vector2(BOARD_POS.x + BOARD_SIZE.x * 0.5, _rocket_top() + 5.0 * CELL + 12.0)
+			for k in 2:
+				var dir := Vector2(randf_range(-0.5, 0.5), 1.0).normalized()
+				puffs.append({"pos": nozzle + Vector2(randf_range(-14.0, 14.0), 0.0), "vel": dir * randf_range(90.0, 220.0), "age": 0.0, "life": randf_range(0.5, 1.1), "size": randf_range(12.0, 22.0)})
 	if state == State.OVER and not won:
 		clog_progress = minf(float(ROWS) + 4.0, clog_progress + delta * 14.0)
 	music.stream_paused = (state == State.PAUSED)
@@ -1093,14 +1266,22 @@ func _process(delta: float) -> void:
 		target_speed = 1.3
 	music_speed = move_toward(music_speed, target_speed, delta * 1.5)
 	music.pitch_scale = music_speed   # built-in synth tune speeds up (and rises) like the Game Boy
+	var titleish := _in_title()
+	if titleish != was_in_title:
+		was_in_title = titleish
+		if titleish:
+			_start_title_music()
+		else:
+			_stop_seq()
+			music.stop()
 	if fart_sample != null and music_enabled:
 		for k in seq_pool.size():
 			if seq_stop[k] > 0.0 and time >= seq_stop[k]:
 				seq_pool[k].stop()
 				seq_stop[k] = 0.0
-		if state == State.PLAYING or state == State.CLEARING:
+		if state == State.PLAYING or state == State.CLEARING or titleish:
 			seq_acc += delta
-			var step: float = float(SONGS[cur_song]["step"]) / music_speed
+			var step: float = float((TITLE_SONG if titleish else SONGS[cur_song])["step"]) / music_speed
 			while seq_acc >= step:
 				seq_acc -= step
 				_seq_tick()
@@ -1165,25 +1346,128 @@ func _update_play(delta: float) -> void:
 
 # ------------------------------------------------------------------ drawing
 
-func _box(r: Rect2, fill: Color, border: Color, radius: int, bw: int = 3, shadow: int = 0) -> void:
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = fill
-	sb.border_color = border
-	sb.set_border_width_all(bw)
-	sb.set_corner_radius_all(radius)
-	sb.anti_aliasing = true
-	if shadow > 0:
-		sb.shadow_size = shadow
-		sb.shadow_color = Color(0, 0, 0, 0.25)
-		sb.shadow_offset = Vector2(0, 4)
-	draw_style_box(sb, r)
+func _box(r: Rect2, fill: Color, border: Color, _radius: int, bw: int = 3, _shadow: int = 0) -> void:
+	# retro dialog: black outline, bright rim, then the fill (square corners, no blur)
+	var t := float(maxi(2, bw))
+	draw_rect(Rect2(r.position + Vector2(t, t) * 0.5, r.size), Color(0, 0, 0, 0.35))   # hard drop shadow
+	draw_rect(r, Color.BLACK)
+	draw_rect(r.grow(-t * 0.5), border)
+	draw_rect(r.grow(-t * 1.5), Color.BLACK)
+	draw_rect(r.grow(-t * 1.5 - 1.0), fill)
+
+
+const FONT_CHARS := "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .,!?-+/():%<>'=#_"
+const FONT_BITS := [
+	".###.#...##...#######...##...##...#",
+	"####.#...##...#####.#...##...#####.",
+	".###.#...##....#....#....#...#.###.",
+	"####.#...##...##...##...##...#####.",
+	"######....#....####.#....#....#####",
+	"######....#....####.#....#....#....",
+	".###.#...##....#.####...##...#.###.",
+	"#...##...##...#######...##...##...#",
+	".###...#....#....#....#....#...###.",
+	"....#....#....#....##...##...#.###.",
+	"#...##..#.#.#..##...#.#..#..#.#...#",
+	"#....#....#....#....#....#....#####",
+	"#...###.###.#.##.#.##...##...##...#",
+	"#...###..##.#.##..###...##...##...#",
+	".###.#...##...##...##...##...#.###.",
+	"####.#...##...#####.#....#....#....",
+	".###.#...##...##...##.#.##..#..##.#",
+	"####.#...##...#####.#.#..#..#.#...#",
+	".#####....#.....###.....#....#####.",
+	"#####..#....#....#....#....#....#..",
+	"#...##...##...##...##...##...#.###.",
+	"#...##...##...##...##...#.#.#...#..",
+	"#...##...##...##.#.##.#.###.###...#",
+	"#...##...#.#.#...#...#.#.#...##...#",
+	"#...##...#.#.#...#....#....#....#..",
+	"#####....#...#...#...#...#....#####",
+	".###.#...##..###.#.###..##...#.###.",
+	"..#...##....#....#....#....#...###.",
+	".###.#...#....#...#...#...#...#####",
+	"####.....#....#.###.....#....#####.",
+	"...#...##..#.#.#..#.#####...#....#.",
+	"######....####.....#....##...#.###.",
+	".###.#....#....####.#...##...#.###.",
+	"#####....#...#...#...#....#....#...",
+	".###.#...##...#.###.#...##...#.###.",
+	".###.#...##...#.####....#....#.###.",
+	"...................................",
+	"..........................##...##..",
+	".....................##...##...#...",
+	"..#....#....#....#....#.........#..",
+	".###.#...#....#...#...#.........#..",
+	"................###................",
+	".......#....#..#####..#....#.......",
+	"....#....#...#...#...#...#....#....",
+	"...#...#...#....#....#.....#.....#.",
+	".#.....#.....#....#....#...#...#...",
+	"......##...##........##...##.......",
+	"##..###..#...#...#...#...#..###..##",
+	"...#...#...#...#.....#.....#.....#.",
+	".#.....#.....#.....#...#...#...#...",
+	"..#....#...#.......................",
+	"..........#####.....#####..........",
+	".#.#.#####.#.#..#.#.#####.#.#......",
+	"..............................#####",
+]
+var font_tex: Texture2D = null
+
+
+# Built-in 5x7 bitmap font (no font file needed): every glyph is drawn from one tiny atlas,
+# scaled with hard pixels. Text is upper-cased, like the old Nintendo games.
+func _build_font() -> void:
+	var img := Image.create(5 * FONT_CHARS.length(), 7, false, Image.FORMAT_RGBA8)
+	img.fill(Color(1, 1, 1, 0))
+	for i in FONT_CHARS.length():
+		var bits: String = FONT_BITS[i]
+		for k in 35:
+			if bits[k] == "#":
+				img.set_pixel(i * 5 + k % 5, k / 5, Color.WHITE)
+	font_tex = ImageTexture.create_from_image(img)
+
+
+func _font_width(s: String, scale: float) -> float:
+	return maxf(0.0, s.length() * 6.0 * scale - scale)
+
+
+func _font_draw(s: String, pos: Vector2, scale: float, col: Color) -> void:
+	var x := pos.x
+	for ch in s:
+		var i := FONT_CHARS.find(ch)
+		if i >= 0 and ch != " ":
+			draw_texture_rect_region(font_tex, Rect2(Vector2(x, pos.y - 7.0 * scale), Vector2(5.0 * scale, 7.0 * scale)), Rect2(i * 5, 0, 5, 7), col)
+		x += 6.0 * scale
+
+
+func _text_a(s: String, pos: Vector2, size: int, col: Color, w: float, align: HorizontalAlignment, outline: int = 0, ocol: Color = Color.BLACK) -> void:
+	s = s.to_upper()
+	var sc := maxf(size * 0.1, 1.7)
+	var tw := _font_width(s, sc)
+	if w > 0.0 and tw > w:      # long lines shrink to fit instead of spilling out
+		sc *= w / tw
+		tw = w
+	var x := pos.x
+	if align == HORIZONTAL_ALIGNMENT_CENTER:
+		x += (w - tw) * 0.5
+	elif align == HORIZONTAL_ALIGNMENT_RIGHT:
+		x += w - tw
+	x = roundf(x)
+	var y := roundf(pos.y)
+	if outline > 0:
+		var o := maxf(1.0, roundf(sc * 0.9))
+		for d in [Vector2(-o, 0), Vector2(o, 0), Vector2(0, -o), Vector2(0, o), Vector2(-o, -o), Vector2(o, -o), Vector2(-o, o), Vector2(o, o)]:
+			_font_draw(s, Vector2(x, y) + d, sc, ocol)
+	if outline == 0:   # a hard 1-2 px shadow keeps small text readable on any background
+		var so := maxf(1.0, roundf(sc * 0.6))
+		_font_draw(s, Vector2(x, y) + Vector2(so, so), sc, Color(0, 0, 0, col.a * 0.85))
+	_font_draw(s, Vector2(x, y), sc, col)
 
 
 func _text(s: String, pos: Vector2, size: int, col: Color, w: float = PANEL.size.x, outline: int = 0, ocol: Color = Color.BLACK) -> void:
-	var font := ThemeDB.fallback_font
-	if outline > 0:
-		draw_string_outline(font, pos, s, HORIZONTAL_ALIGNMENT_CENTER, w, size, outline, ocol)
-	draw_string(font, pos, s, HORIZONTAL_ALIGNMENT_CENTER, w, size, col)
+	_text_a(s, pos, size, col, w, HORIZONTAL_ALIGNMENT_CENTER, outline, ocol)
 
 
 func _draw() -> void:
@@ -1211,14 +1495,11 @@ func _draw() -> void:
 		_draw_butt_layer()   # on top of everything in the well: pieces, dimming, pause and title boxes
 	for pf in puffs:
 		var u := float(pf["age"]) / float(pf["life"])
-		var r := float(pf["size"]) * (0.6 + 0.9 * u)
-		var a := 0.55 * (1.0 - u)
-		draw_circle(pf["pos"], r, Color(0.62, 0.68, 0.3, a))
-		draw_circle((pf["pos"] as Vector2) + Vector2(-r * 0.25, -r * 0.25), r * 0.55, Color(0.82, 0.86, 0.5, a * 0.8))
-
-
-func _text_a(s: String, pos: Vector2, size: int, col: Color, w: float, align: HorizontalAlignment) -> void:
-	draw_string(ThemeDB.fallback_font, pos, s, align, w, size, col)
+		var px3 := roundf(float(pf["size"]) * (0.7 + 0.8 * u) / 3.0) * 3.0
+		var pp: Vector2 = ((pf["pos"] as Vector2) / 3.0).round() * 3.0
+		var pa := 1.0 if u < 0.7 else 0.55
+		draw_rect(Rect2(pp - Vector2(px3, px3) * 0.5, Vector2(px3, px3)), Color(0.36, 0.56, 0.2, pa))
+		draw_rect(Rect2(pp - Vector2(px3, px3) * 0.5, Vector2(px3, px3) * 0.5), Color(0.66, 0.84, 0.32, pa))
 
 
 func _draw_menu() -> void:
@@ -1226,30 +1507,32 @@ func _draw_menu() -> void:
 	var scol := Color("7f93a0")
 	var gold := Color("ffe9a8")
 	var vw := VIEW_SIZE.x
-	_box(Rect2(70, 50, 580, 740), Color(0.05, 0.07, 0.09, 0.93), Color("55666f"), 26, 4, 14)
-	_text("TURDTRIS", Vector2(0, 150), 68, Color("c68a52"), vw, 10, Color("3a2212"))
-	_text("- GAME SETUP -", Vector2(0, 196), 18, scol, vw)
-	_text("HIGH SCORE  %d" % high, Vector2(0, 232), 16, tcol, vw)
+	_box(Rect2(20, 50, 680, 740), Color(0.05, 0.07, 0.09, 0.93), Color("55666f"), 26, 4, 14)
+	_text("TURDTRIS", Vector2(0, 146), 68, Color("c68a52"), vw, 10, Color("3a2212"))
+	_text("CALL OF DOODY", Vector2(0, 186), 26, Color("ffe9a8"), vw, 4, Color("3a2212"))
+	_text("- GAME SETUP -", Vector2(0, 218), 16, scol, vw)
+	_text("HIGH SCORE  %d" % high, Vector2(0, 246), 16, tcol, vw)
 	var rows := [
 		["GAME TYPE", "A-TYPE" if game_type == 0 else "B-TYPE"],
 		["LEVEL", str(start_level)],
 		["HEIGHT", str(start_height)],
 		["MUSIC", str(SONGS[cur_song]["name"]) if music_enabled else "OFF"],
+		["INSTANT PLOP", "ON" if instant_drop else "OFF"],
 		["START", ""],
 	]
 	for i in rows.size():
-		var y := 310.0 + i * 78.0
+		var y := 304.0 + i * 66.0
 		var sel := i == menu_row
 		var dimmed := i == 2 and game_type == 0
 		var col := gold if sel else tcol
 		if dimmed:
 			col = Color(0.35, 0.4, 0.45)
 		if sel:
-			draw_rect(Rect2(110, y - 40, 500, 58), Color(1, 1, 1, 0.06 + 0.04 * sin(time * 6.0)))
+			draw_rect(Rect2(110, y - 40, 500, 52), Color(1, 1, 1, 0.06 + 0.04 * sin(time * 6.0)))
 			draw_block(Vector2(120, y - 34), 36.0, 0, 0)
 		_text_a(str(rows[i][0]), Vector2(175, y), 28, col, 300.0, HORIZONTAL_ALIGNMENT_LEFT)
 		var val := str(rows[i][1])
-		if i == 4:
+		if i == 5:
 			if sel:
 				val = _p("confirm").to_upper()
 		elif sel and not dimmed:
@@ -1261,11 +1544,12 @@ func _draw_menu() -> void:
 		"A-TYPE plays until you clog the toilet. B-TYPE: clear 25 lines.",
 		"Starting level. Higher levels drop faster.",
 		"B-TYPE only: starting garbage, HEIGHT x 2 rows.",
-		"Songs 1 / 2 / 3 or OFF. 1 / 2 / 3 also works during the game.",
+		"Songs 1 - 4 or OFF. The 1 - 4 keys also work during the game.",
+		"ON: Up%s plops the piece instantly. OFF: classic Game Boy feel." % (" (D-pad)" if using_pad else ""),
 		"Press %s to start." % _p("confirm"),
 	]
-	_text(tips[menu_row], Vector2(0, 722), 15, scol, vw)
-	_text(("D-PAD select / change    %s start    %s back" if using_pad else "UP / DOWN select    LEFT / RIGHT change    %s start    %s back") % [_p("confirm"), _p("back")], Vector2(0, 752), 13, scol, vw)
+	_text(tips[menu_row], Vector2(40, 722), 15, scol, 640.0)
+	_text(("D-PAD select / change    %s start    %s back" if using_pad else "UP / DOWN select    LEFT / RIGHT change    %s start    %s back") % [_p("confirm"), _p("back")], Vector2(40, 752), 13, scol, 640.0)
 
 
 func _draw_wall(screen: Vector2, stage: Vector2) -> void:
@@ -1395,22 +1679,22 @@ func _draw_well() -> void:
 				var o := BOARD_POS + Vector2(cur_pos.x + c.x, cur_pos.y + c.y) * CELL
 				draw_block(o, CELL, cur_type, (cur_pos.x + c.x) * 31 + (cur_pos.y + c.y) * 17 + cur_type)
 
+	# water at the bottom of the bowl: plain 6 px columns whose tops move in whole 3 px steps
+	# (rectangles only: the rounded corners are trimmed by the corner caps drawn right after)
+	if turd_mode:
+		var top := BOARD_POS.y + BOARD_SIZE.y - 2.5 * CELL
+		var bottom := BOARD_POS.y + BOARD_SIZE.y
+		var wx := 0.0
+		while wx < BOARD_SIZE.x:
+			var sy: float = top + roundf(sin(time * 1.6 + wx * 0.05) * 1.2) * 3.0
+			var cw := minf(6.0, BOARD_SIZE.x - wx)
+			draw_rect(Rect2(BOARD_POS.x + wx, sy, cw, bottom - sy), Color(0.2, 0.42, 0.8, 0.45))
+			draw_rect(Rect2(BOARD_POS.x + wx, sy, cw, 3.0), Color(0.62, 0.84, 1.0, 0.8))
+			wx += 6.0
+
 	# pieces must not poke out of the rounded corners: paint the corner bits of the frame over them
 	if turd_mode:
 		_draw_corner_caps(well)
-
-	# water at the bottom of the bowl
-	if turd_mode:
-		var top := BOARD_POS.y + BOARD_SIZE.y - 2.5 * CELL
-		var pts := PackedVector2Array()
-		var wx := 0.0
-		while wx <= BOARD_SIZE.x:
-			pts.append(Vector2(BOARD_POS.x + wx, top + sin(time * 2.2 + wx * 0.06) * 3.0))
-			wx += 6.0
-		var surface := pts.duplicate()
-		pts.append_array(_round_poly(well, 30.0, 56.0, 14).slice(14, 42))   # follow the rounded bottom corners
-		draw_colored_polygon(pts, Color(0.25, 0.5, 0.85, 0.30))
-		draw_polyline(surface, Color(0.7, 0.9, 1.0, 0.45), 2.0)
 
 	# piece hint (ghost) sits over the water so it stays visible
 	if SHOW_GHOST and (state == State.PLAYING or state == State.PAUSED):
@@ -1456,6 +1740,68 @@ func _turd_style(type: int, mask: int) -> StyleBoxFlat:
 	sb.anti_aliasing = true
 	style_cache[key] = sb
 	return sb
+
+
+# Pixel-art turd cell: a 12x12 sprite built in code, one per piece colour and neighbour mask.
+# The swirl creases use only x and y, repeating every 12 px, so melded cells flow into each other.
+const PX := 12
+const SWIRL := [0, 1, 2, 2, 1, 0, 0, -1, -2, -2, -1, 0]
+var pixel_cache := {}
+
+
+func _pixel_turd(type: int, mask: int) -> Texture2D:
+	var key := type * 16 + mask
+	if pixel_cache.has(key):
+		return pixel_cache[key]
+	# SNES-style: 15-bit colours, a small ramp of browns with a coloured (not black) outline
+	var outline := Color("2a1408")
+	var deep := Color("4a2a14")
+	var shade := Color("6e4120")
+	var base := Color("94592c")
+	var mid := Color("b57a3e")
+	var light := Color("d9a35c")
+	var shine := Color("f4d79a")
+	var corn := Color("e8d070")
+	var up := (mask & 1) != 0
+	var down := (mask & 2) != 0
+	var left := (mask & 4) != 0
+	var right := (mask & 8) != 0
+	var img := Image.create(PX, PX, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var last := PX - 1
+	for y in PX:
+		for x in PX:
+			# rounded outer corners: a corner with no neighbour on either side is cut off
+			if (x == 0 and y == 0 and not left and not up) or (x == last and y == 0 and not right and not up) \
+					or (x == 0 and y == last and not left and not down) or (x == last and y == last and not right and not down):
+				continue
+			if (x == 0 and not left) or (x == last and not right) or (y == 0 and not up) or (y == last and not down):
+				img.set_pixel(x, y, outline)
+				continue
+			# each coil: dark crease, bright top edge, soft body, shadowed underside
+			var band := posmod(y + int(SWIRL[x]) + type * 2, 6)
+			var c := base
+			match band:
+				0: c = deep
+				1: c = shine if (x + y) % 5 == 0 else light
+				2: c = mid
+				3: c = base
+				4: c = shade
+				5: c = deep if (x + y) % 2 == 0 else shade
+			# lit from the top-left: the rim just inside an exposed edge catches light or falls into shadow
+			if band != 0:
+				if (x == 1 and not left) or (y == 1 and not up):
+					c = light if c != shine else c
+				elif (x == last - 1 and not right) or (y == last - 1 and not down):
+					c = shade if c != deep else c
+			if x == 8 and y == 4 and type % 2 == 0:
+				c = corn
+			if x == 3 and y == 8 and type % 3 == 0:
+				c = corn
+			img.set_pixel(x, y, c)
+	var tex := ImageTexture.create_from_image(img)
+	pixel_cache[key] = tex
+	return tex
 
 
 # mask < 0: a loose square (falling piece, previews). mask >= 0: a settled cell, with
@@ -1575,30 +1921,7 @@ func draw_block(o: Vector2, s: float, type: int, seed_v: int, mask: int = -1) ->
 		if tex != null:
 			draw_texture_rect(tex, r, false)
 			return
-		var melded := mask >= 0
-		var m := mask if melded else 0
-		var base: Color = TURD_COLORS[type]
-		draw_style_box(_turd_style(type, m), r if melded else r.grow(-1.5))
-		# wavy coil ridges; waves use absolute x so they flow across melded cells
-		var x0 := o.x + (0.0 if (m & 4) != 0 else 5.0)
-		var x1 := o.x + s - (0.0 if (m & 8) != 0 else 5.0)
-		var dark := base.darkened(0.4)
-		var light := base.lightened(0.35)
-		light.a = 0.7
-		for ry in [0.30, 0.68]:
-			var pts := PackedVector2Array()
-			var hl := PackedVector2Array()
-			var px := x0
-			while px < x1 + 0.1:
-				var py: float = o.y + s * ry + sin(px * 0.32 + ry * 7.0) * 2.2
-				pts.append(Vector2(px, py))
-				hl.append(Vector2(px, py - 3.5))
-				px += 4.0
-			if pts.size() >= 2:
-				draw_polyline(pts, dark, 2.5)
-				draw_polyline(hl, light, 1.5)
-		if seed_v % 5 == 0:
-			draw_circle(o + Vector2(s * 0.7, s * 0.5), s * 0.05, Color("d9c24a"))
+		draw_texture_rect(_pixel_turd(type, maxi(mask, 0)), r, false)
 	else:
 		draw_style_box(classic_styles[type], r.grow(-1.0))
 		draw_rect(Rect2(o + Vector2(4, 4), Vector2(s - 8.0, 3)), Color(1, 1, 1, 0.35))
@@ -1623,36 +1946,95 @@ func draw_preview(type: int, box: Rect2) -> void:
 
 
 func _draw_panel() -> void:
-	var tcol := Color("e9d8bd") if turd_mode else Color("e8e8f0")
-	var scol := Color("7f93a0") if turd_mode else Color("8a8fb0")
+	var tcol := Color("f4e6cc") if turd_mode else Color("f0f0f8")
+	var scol := Color("b9c9d3") if turd_mode else Color("b8bcd8")   # label colour: bright enough to read on the dark panel
 	var px := PANEL.position.x
-	_text("TURDTRIS", Vector2(px, 116), 38, tcol)
+	_text("TURDTRIS", Vector2(px, 120), 42, tcol)
 
-	_text("NEXT", Vector2(px, 166), 16, scol)
-	draw_preview(next_type if state != State.TITLE else -1, Rect2(px + 40, 176, 190, 100))
+	_text("NEXT", Vector2(px, 180), 20, scol)
+	draw_preview(next_type if state != State.TITLE else -1, Rect2(px + 40, 192, 190, 100))
 
-	var y := 340.0
+	var y := 352.0
 	var lines_text := str(lines) if game_type == 0 else "%d / %d" % [lines, GOAL]
 	for row in [["SCORE", str(score)], ["HIGH", str(high)], ["LEVEL", str(level)], ["LINES", lines_text]]:
-		_text(row[0], Vector2(px, y), 14, scol)
-		_text(row[1], Vector2(px, y + 28.0), 28, tcol)
-		y += 62.0
+		_text(row[0], Vector2(px, y), 20, scol)
+		_text(row[1], Vector2(px, y + 38.0), 36, tcol)
+		y += 76.0
 
-	_text(("MUSIC - %s" if using_pad else "MUSIC  (%s)") % _p("music"), Vector2(px, 610), 14, scol)
-	_text(str(SONGS[cur_song]["name"]) if music_enabled else "OFF", Vector2(px, 636), 20, tcol)
-
-	var hint: Array
-	if using_pad:
-		hint = ["D-pad / Stick: move   Down: soft plop", "%s rotate   %s rotate back" % [_p("rot"), _p("rotb")], "%s: pause   %s: next song" % [_p("pause"), _p("music")], "Keyboard: M mute   F11 fullscreen"]
-	else:
-		hint = ["A/D or Arrows: move   Down: soft plop", "X rotate   Z rotate back", "P: pause   M: mute   F11: fullscreen", "1 / 2 / 3: music", ""]
-	for i in hint.size():
-		_text(hint[i], Vector2(px, 706.0 + i * 16.0), 12, scol)
+	_text(("MUSIC - %s" if using_pad else "MUSIC  (%s)") % _p("music"), Vector2(px, 680), 18, scol)
+	_text(str(SONGS[cur_song]["name"]) if music_enabled else "OFF", Vector2(px, 716), 26, tcol)
 
 
 # Dimming for title / pause / game-over: follows the rounded corners of the bowl instead of a square
 func _dim_well(well: Rect2, col: Color) -> void:
 	draw_colored_polygon(_round_poly(well, 30.0, 56.0, 14), col)
+
+
+const WIN_PROMPT_AT := 5.2   # the win screen shows its prompt (and accepts the button) from here
+const LAUNCH_AT := 1.8      # seconds on the pad (3-2-1) before liftoff
+
+
+func _rocket_top() -> float:
+	var tl := maxf(0.0, win_t - LAUNCH_AT)
+	var pad_y := BOARD_POS.y + BOARD_SIZE.y - 44.0
+	return pad_y - 5.0 * CELL - 0.5 * 330.0 * tl * tl
+
+
+# The victory screen: a rocket built out of turds counts down on a pad and blasts off, like the Game Boy ending.
+func _draw_win_scene(well: Rect2, cx: float, w: float, brown: Color) -> void:
+	_dim_well(well, Color(0.02, 0.03, 0.09, 0.9))
+	for i in 46:   # twinkling stars
+		var sp := Vector2(BOARD_POS.x + fposmod(i * 97.0, BOARD_SIZE.x - 12.0) + 6.0, BOARD_POS.y + fposmod(i * 173.0, BOARD_SIZE.y - 80.0) + 6.0)
+		var tw := 0.35 + 0.65 * absf(sin(time * 2.0 + i))
+		draw_rect(Rect2(sp.round(), Vector2(3, 3) if i % 3 != 0 else Vector2(6, 6)), Color(1, 1, 0.85, tw))
+	var pad_y := BOARD_POS.y + BOARD_SIZE.y - 44.0
+	var bx := BOARD_POS.x + BOARD_SIZE.x * 0.5 - 1.5 * CELL
+	draw_rect(Rect2(BOARD_POS.x + 110, pad_y, BOARD_SIZE.x - 220, 14), Color("7d8b95"))
+	draw_rect(Rect2(BOARD_POS.x + 110, pad_y, BOARD_SIZE.x - 220, 4), Color("c9d3d9"))
+	var tl := maxf(0.0, win_t - LAUNCH_AT)
+	var jitter := Vector2.ZERO
+	if win_t > 0.9 and win_t < LAUNCH_AT + 0.4:
+		jitter = Vector2(randf_range(-2.0, 2.0), randf_range(-1.0, 1.0))
+	var top := _rocket_top()
+	var o := Vector2(bx, top) + jitter
+	# nose cone: stepped, three rows
+	for r in 3:
+		var half := 6.0 + 12.0 * r
+		draw_rect(Rect2(o.x + 54.0 - half, o.y + r * 12.0, half * 2.0, 12.0), Color("e45c10"))
+		draw_rect(Rect2(o.x + 54.0 - half, o.y + r * 12.0, minf(half * 2.0, 6.0), 12.0), Color("fca044"))
+	var cells := [
+		[0, 1, 10], [1, 1, 15], [2, 1, 6],
+		[0, 2, 11], [1, 2, 15], [2, 2, 7],
+		[0, 3, 11], [1, 3, 13], [2, 3, 7],
+	]
+	for c in cells:
+		draw_block(o + Vector2(c[0], c[1]) * CELL, CELL, 0, 0, c[2])
+	draw_block(o + Vector2(0, 4) * CELL, CELL, 4, 0, 0)   # fins
+	draw_block(o + Vector2(2, 4) * CELL, CELL, 4, 0, 0)
+	draw_rect(Rect2(o + Vector2(CELL + 6.0, 4.0 * CELL), Vector2(24, 14)), Color("2a1408"))   # nozzle
+	var wc := o + Vector2(54.0, 2.5 * CELL)
+	draw_rect(Rect2(wc - Vector2(15, 15), Vector2(30, 30)), Color.BLACK)   # porthole
+	draw_rect(Rect2(wc - Vector2(12, 12), Vector2(24, 24)), Color("7fcdf8"))
+	draw_rect(Rect2(wc - Vector2(9, 9), Vector2(9, 9)), Color("e8f6ff"))
+	if win_t > 0.9:   # flame, a stack of shrinking pixel rows that flickers
+		var flen := (3 + int(randf() * 3.0)) + (6 if tl > 0.0 else 0)
+		for k in flen:
+			var fw := maxf(6.0, 24.0 - k * 3.0)
+			var fy := o.y + 4.0 * CELL + 14.0 + k * 6.0
+			draw_rect(Rect2(o.x + 54.0 - fw * 0.5, fy, fw, 6.0), Color("f83800") if k % 3 == 2 else Color("fca044"))
+			if fw > 10.0:
+				draw_rect(Rect2(o.x + 54.0 - fw * 0.25, fy, fw * 0.5, 6.0), Color("fcfcfc") if k < 3 else Color("f8d878"))
+	_text("ALL FLUSHED!", Vector2(cx, BOARD_POS.y + 90), 44, Color("e0a468"), w, 8, brown)
+	if win_t < LAUNCH_AT:
+		var count := int(ceil((LAUNCH_AT - win_t) / (LAUNCH_AT / 3.0)))
+		_text(str(clampi(count, 1, 3)), Vector2(cx, BOARD_POS.y + 190), 80, Color.WHITE, w, 10, Color(0.1, 0.1, 0.3))
+	elif tl > 0.0 and tl < 0.9:
+		_text("BLAST OFF!", Vector2(cx, BOARD_POS.y + 190), 44, Color("ffe9a8"), w, 8, brown)
+	if win_t > WIN_PROMPT_AT:
+		_text("Score %d" % score, Vector2(cx, BOARD_POS.y + 340), 24, Color.WHITE, w)
+		_text("%s for the menu" % _p("confirm"), Vector2(cx, BOARD_POS.y + 385), 18, Color(1, 1, 1, 0.6 + 0.4 * sin(time * 4.0)), w)
+		_text("Game by ResidentEmil_", Vector2(cx, BOARD_POS.y + 450), 18, Color("ffe9a8"), w)
+		_text("with assistance from Claude AI", Vector2(cx, BOARD_POS.y + 478), 16, Color("b9c9d3"), w)
 
 
 func _draw_overlays() -> void:
@@ -1663,7 +2045,8 @@ func _draw_overlays() -> void:
 	match state:
 		State.TITLE:
 			_dim_well(well, Color(0, 0, 0, 0.6))
-			_text("TURDTRIS", Vector2(cx, BOARD_POS.y + 250), 54, Color("c68a52"), w, 8, brown)
+			_text("TURDTRIS", Vector2(cx, BOARD_POS.y + 240), 54, Color("c68a52"), w, 8, brown)
+			_text("CALL OF DOODY", Vector2(cx, BOARD_POS.y + 284), 22, Color("ffe9a8"), w, 4, brown)
 			var a := 0.6 + 0.4 * sin(time * 4.0)
 			_text("Press %s" % _p("confirm"), Vector2(cx, BOARD_POS.y + 320), 20, Color(1, 1, 1, a), w)
 		State.PAUSED:
@@ -1685,11 +2068,13 @@ func _draw_overlays() -> void:
 					draw_rect(Rect2(cx + 24, iy - 38, w - 48, 54), Color(1, 1, 1, 0.08 + 0.04 * sin(time * 6.0)))
 					draw_block(Vector2(cx + 32, iy - 33), 36.0, 0, 0)
 				_text(str(items[i]), Vector2(cx, iy), 26, Color("ffe9a8") if sel else Color(0.78, 0.78, 0.78), w)
-			_text(("UP / DOWN select    %s confirm    %s back" % [_p("confirm"), _p("back")]) if using_pad else "UP / DOWN select    ENTER confirm    P back", Vector2(cx, BOARD_POS.y + 660), 13, Color(1, 1, 1, 0.6), w)
+			_text(("UP/DOWN select  %s confirm  %s back" % [_p("confirm"), _p("back")]) if using_pad else "UP/DOWN select  ENTER confirm  P back", Vector2(cx, BOARD_POS.y + 660), 13, Color(1, 1, 1, 0.6), w)
 		State.OVER:
-			if won or clog_progress >= float(ROWS):
-				_dim_well(well, Color(0.2, 0.1, 0.05, 0.7 if won else 0.5))
-				_text("ALL FLUSHED!" if won else "CLOGGED!", Vector2(cx, BOARD_POS.y + 290), 44 if won else 48, Color("e0a468"), w, 8, brown)
+			if won:
+				_draw_win_scene(well, cx, w, brown)
+			elif clog_progress >= float(ROWS):
+				_dim_well(well, Color(0.2, 0.1, 0.05, 0.5))
+				_text("CLOGGED!", Vector2(cx, BOARD_POS.y + 290), 48, Color("e0a468"), w, 8, brown)
 				_text("Score %d" % score, Vector2(cx, BOARD_POS.y + 340), 24, Color.WHITE, w)
 				_text("%s for the menu" % _p("confirm"), Vector2(cx, BOARD_POS.y + 385), 18, Color(1, 1, 1, 0.6 + 0.4 * sin(time * 4.0)), w)
 	if popup_timer > 0.0 and popup_text != "":

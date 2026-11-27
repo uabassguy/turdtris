@@ -14,7 +14,7 @@ Press 1 / 2 / 3 in game (or the controller's music button) to switch songs.
 Fart Fanfare is the default:
   1  Fart Fanfare   (original, parts A + B)
   2  Korobeiniki    (traditional Russian folk song, plays A A B A)
-  3  Minuet in G    (Petzold, long attributed to Bach)
+  3  Brownsleeves   (Minuet in G, Petzold, long attributed to Bach)
 All three are played with your fart sample when fart.wav/.ogg/.mp3 is here,
 otherwise with the built-in synth. The music speeds up when the stack gets
 more than 60% full. The notes live in the SONGS table at the top of main.gd
