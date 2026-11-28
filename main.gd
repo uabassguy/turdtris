@@ -225,6 +225,9 @@ const CLEAR_POINTS := [0, 100, 300, 500, 800]
 
 var board: Array[int] = []
 var ids: Array[int] = []        # which dropped piece each settled cell belongs to (for melding)
+var corn: Array[int] = []       # corn kernel variant (0 = none) of each settled cell; fixed once the piece lands
+var cur_corn: Array[int] = [0, 0, 0, 0]    # kernels on the falling piece, one entry per cell
+var next_corn: Array[int] = [0, 0, 0, 0]   # kernels on the previewed piece (so the preview matches)
 var piece_serial := 0
 var meld_id := -1               # most recently locked piece, melds a split second after landing
 var meld_t := 0.0
@@ -313,7 +316,10 @@ func _ready() -> void:
 	board.fill(-1)
 	ids.resize(COLS * ROWS)
 	ids.fill(-1)
+	corn.resize(COLS * ROWS)
+	corn.fill(0)
 	next_type = randi() % 7
+	next_corn = _roll_corn()
 
 
 # ------------------------------------------------------------------ setup
@@ -716,6 +722,7 @@ func fits(type: int, rot: int, pos: Vector2i) -> bool:
 func new_game() -> void:
 	board.fill(-1)
 	ids.fill(-1)
+	corn.fill(0)
 	meld_id = -1
 	soft_blocked = false
 	cur_type = -1
@@ -728,6 +735,7 @@ func new_game() -> void:
 	clear_rows.clear()
 	popup_timer = 0.0
 	next_type = randi() % 7
+	next_corn = _roll_corn()
 	state = State.PLAYING
 	seq_step = 0
 	seq_acc = 0.0
@@ -747,8 +755,9 @@ func _add_garbage(rows_n: int) -> void:
 			if x == hole or randf() < 0.45:
 				continue
 			piece_serial += 1
-			board[y * COLS + x] = randi() % 7
+			board[y * COLS + x] = [0, 2, 3, 4][randi() % 4]   # plain brown: green (L, J) and red (O) are reserved for real pieces
 			ids[y * COLS + x] = piece_serial
+			corn[y * COLS + x] = 0
 
 
 func stack_height() -> int:
@@ -759,8 +768,19 @@ func stack_height() -> int:
 	return 0
 
 
+# Corn: about 3 in 10 pieces carry one or two kernels, each on a random cell. Rolled when the piece
+# is chosen (so the NEXT preview matches), carried while it falls, and frozen into `corn` when it lands.
+func _roll_corn() -> Array[int]:
+	var out: Array[int] = [0, 0, 0, 0]
+	if randf() < 0.3:
+		for k in randi_range(1, 2):
+			out[randi() % 4] = randi_range(1, CORN_SPOTS.size())
+	return out
+
+
 func spawn_piece(type: int) -> void:
 	cur_type = type
+	cur_corn = next_corn.duplicate()
 	cur_rot = 0
 	var top := 99
 	for c in piece_cells(type, 0):
@@ -792,6 +812,7 @@ func spawn_next() -> void:
 	var locked := cur_type
 	spawn_piece(next_type)
 	next_type = _gb_roll(locked, cur_type)
+	next_corn = _roll_corn()
 
 
 func _defeat_sound() -> void:
@@ -869,7 +890,9 @@ func lock_piece() -> void:
 	piece_serial += 1
 	meld_id = piece_serial
 	meld_t = 0.12
-	for c in piece_cells(cur_type, cur_rot):
+	var lcells := piece_cells(cur_type, cur_rot)
+	for k in lcells.size():
+		var c: Vector2i = lcells[k]
 		var x := cur_pos.x + c.x
 		var y := cur_pos.y + c.y
 		if y < 0:
@@ -877,6 +900,7 @@ func lock_piece() -> void:
 			return
 		board[y * COLS + x] = cur_type
 		ids[y * COLS + x] = piece_serial
+		corn[y * COLS + x] = cur_corn[k]
 	soft_blocked = true   # down must be released and pressed again for the next piece
 	play_sfx("plop", randf_range(0.9, 1.15))
 	clear_rows.clear()
@@ -905,12 +929,14 @@ func finish_clear() -> void:
 	var n := clear_rows.size()
 	var kept: Array[int] = []
 	var kept_ids: Array[int] = []
+	var kept_corn: Array[int] = []
 	for y in ROWS:
 		if clear_rows.has(y):
 			continue
 		for x in COLS:
 			kept.append(board[y * COLS + x])
 			kept_ids.append(ids[y * COLS + x])
+			kept_corn.append(corn[y * COLS + x])
 	var nb: Array[int] = []
 	nb.resize(n * COLS)
 	nb.fill(-1)
@@ -921,6 +947,11 @@ func finish_clear() -> void:
 	ni.fill(-1)
 	ni.append_array(kept_ids)
 	ids = ni
+	var nc: Array[int] = []
+	nc.resize(n * COLS)
+	nc.fill(0)
+	nc.append_array(kept_corn)
+	corn = nc
 	soft_blocked = true   # holding down through a clear must not carry into the next piece
 	score += int(CLEAR_POINTS[n]) * level
 	lines += n
@@ -1038,6 +1069,7 @@ func quit_to_title() -> void:
 	pause_row = 0
 	board.fill(-1)
 	ids.fill(-1)
+	corn.fill(0)
 	cur_type = -1
 	meld_t = 0.0
 	clog_progress = 0.0
@@ -1545,7 +1577,7 @@ func _draw_menu() -> void:
 		"Starting level. Higher levels drop faster.",
 		"B-TYPE only: starting garbage, HEIGHT x 2 rows.",
 		"Songs 1 - 4 or OFF. The 1 - 4 keys also work during the game.",
-		"ON: Up%s plops the piece instantly. OFF: classic Game Boy feel." % (" (D-pad)" if using_pad else ""),
+		"ON: Up%s plops instantly and shows the drop outline. OFF: no outline." % (" (D-pad)" if using_pad else ""),
 		"Press %s to start." % _p("confirm"),
 	]
 	_text(tips[menu_row], Vector2(40, 722), 15, scol, 640.0)
@@ -1667,17 +1699,19 @@ func _draw_well() -> void:
 				# a just-landed piece stays as separate squares for a moment, then melds
 				if id == meld_id and meld_t > 0.0:
 					mask = -1
-				draw_block(BOARD_POS + Vector2(x, y) * CELL, CELL, v, x * 31 + y * 17 + v, mask)
+				draw_block(BOARD_POS + Vector2(x, y) * CELL, CELL, v, x * 31 + y * 17 + v, mask, corn[i])
 
 	if state == State.OVER and not won:
 		_draw_clog()
 
 	# ghost + active piece
 	if state == State.PLAYING or state == State.PAUSED:
-		for c in piece_cells(cur_type, cur_rot):
+		var acells := piece_cells(cur_type, cur_rot)
+		for k in acells.size():
+			var c: Vector2i = acells[k]
 			if cur_pos.y + c.y >= 0:
 				var o := BOARD_POS + Vector2(cur_pos.x + c.x, cur_pos.y + c.y) * CELL
-				draw_block(o, CELL, cur_type, (cur_pos.x + c.x) * 31 + (cur_pos.y + c.y) * 17 + cur_type)
+				draw_block(o, CELL, cur_type, (cur_pos.x + c.x) * 31 + (cur_pos.y + c.y) * 17 + cur_type, -1, cur_corn[k])
 
 	# water at the bottom of the bowl: plain 6 px columns whose tops move in whole 3 px steps
 	# (rectangles only: the rounded corners are trimmed by the corner caps drawn right after)
@@ -1697,7 +1731,7 @@ func _draw_well() -> void:
 		_draw_corner_caps(well)
 
 	# piece hint (ghost) sits over the water so it stays visible
-	if SHOW_GHOST and (state == State.PLAYING or state == State.PAUSED):
+	if SHOW_GHOST and instant_drop and (state == State.PLAYING or state == State.PAUSED):
 		var gp2 := ghost_pos()
 		var gcol2: Color = TURD_COLORS[cur_type] if turd_mode else CLASSIC_COLORS[cur_type]
 		gcol2 = gcol2.lightened(0.25)
@@ -1745,12 +1779,21 @@ func _turd_style(type: int, mask: int) -> StyleBoxFlat:
 # Pixel-art turd cell: a 12x12 sprite built in code, one per piece colour and neighbour mask.
 # The swirl creases use only x and y, repeating every 12 px, so melded cells flow into each other.
 const PX := 12
+const CORN_SPOTS := [Vector2i(5, 1), Vector2i(1, 5), Vector2i(3, 3), Vector2i(1, 1), Vector2i(5, 5), Vector2i(3, 1)]
 const SWIRL := [0, 1, 2, 2, 1, 0, 0, -1, -2, -2, -1, 0]
 var pixel_cache := {}
 
 
-func _pixel_turd(type: int, mask: int) -> Texture2D:
-	var key := type * 16 + mask
+# L turds are green and O (square) turds are red: keep the sprite's own light and shade, swap the hue
+func _recolor(c: Color, green: bool) -> Color:
+	var lum := clampf((c.r * 0.3 + c.g * 0.59 + c.b * 0.11 - 0.12) / 0.62, 0.0, 1.0)
+	var dark := Color("1a2a08") if green else Color("3a0c0c")
+	var lite := Color("a8d040") if green else Color("f06048")
+	return c.lerp(dark.lerp(lite, lum), 0.8)
+
+
+func _pixel_turd(type: int, mask: int, corn_v: int = 0) -> Texture2D:
+	var key := type * 16 + mask + corn_v * 1000
 	if pixel_cache.has(key):
 		return pixel_cache[key]
 	# SNES-style: 15-bit colours, a small ramp of browns with a coloured (not black) outline
@@ -1761,7 +1804,7 @@ func _pixel_turd(type: int, mask: int) -> Texture2D:
 	var mid := Color("b57a3e")
 	var light := Color("d9a35c")
 	var shine := Color("f4d79a")
-	var corn := Color("e8d070")
+	var kern := Color("e8d070")
 	var up := (mask & 1) != 0
 	var down := (mask & 2) != 0
 	var left := (mask & 4) != 0
@@ -1794,11 +1837,21 @@ func _pixel_turd(type: int, mask: int) -> Texture2D:
 					c = light if c != shine else c
 				elif (x == last - 1 and not right) or (y == last - 1 and not down):
 					c = shade if c != deep else c
-			if x == 8 and y == 4 and type % 2 == 0:
-				c = corn
-			if x == 3 and y == 8 and type % 3 == 0:
-				c = corn
+			if type == 6 or type == 5 or type == 1:   # both L-shaped pieces (L and J) are green, O is red
+				c = _recolor(c, type != 1)
 			img.set_pixel(x, y, c)
+	# corn kernels (random per falling piece, frozen once it lands): a 2x2 kernel with a bright top row
+	if corn_v > 0:
+		var sp: Vector2i = CORN_SPOTS[corn_v - 1]
+		var gold := Color("c9a23c")
+		for dx in range(1, 5):   # a rounded 6x5 kernel: bright top, gold underside, dark shadow below
+			img.set_pixel(sp.x + dx, sp.y, Color("fff0a0") if dx == 1 else kern)
+			img.set_pixel(sp.x + dx, sp.y + 5, Color("5a3a08"))
+		for dx in 6:
+			img.set_pixel(sp.x + dx, sp.y + 1, kern if dx < 5 else gold)
+			img.set_pixel(sp.x + dx, sp.y + 2, kern if dx < 4 else gold)
+			img.set_pixel(sp.x + dx, sp.y + 3, kern if dx < 3 else gold)
+			img.set_pixel(sp.x + dx, sp.y + 4, gold)
 	var tex := ImageTexture.create_from_image(img)
 	pixel_cache[key] = tex
 	return tex
@@ -1914,20 +1967,20 @@ func _draw_bowl_interior(well: Rect2) -> void:
 	draw_polyline(rim, Color("6d818c"), 3.0)
 
 
-func draw_block(o: Vector2, s: float, type: int, seed_v: int, mask: int = -1) -> void:
+func draw_block(o: Vector2, s: float, type: int, seed_v: int, mask: int = -1, corn_v: int = 0) -> void:
 	var r := Rect2(o, Vector2(s, s))
 	if turd_mode:
 		var tex := turd_texs[type]
 		if tex != null:
 			draw_texture_rect(tex, r, false)
 			return
-		draw_texture_rect(_pixel_turd(type, maxi(mask, 0)), r, false)
+		draw_texture_rect(_pixel_turd(type, maxi(mask, 0), corn_v), r, false)
 	else:
 		draw_style_box(classic_styles[type], r.grow(-1.0))
 		draw_rect(Rect2(o + Vector2(4, 4), Vector2(s - 8.0, 3)), Color(1, 1, 1, 0.35))
 
 
-func draw_preview(type: int, box: Rect2) -> void:
+func draw_preview(type: int, box: Rect2, kernels: Array[int] = []) -> void:
 	var pcol := Color("0d1318") if turd_mode else Color("11121b")
 	_box(box, pcol, Color("55666f") if turd_mode else Color("3a3f5c"), 10, 2)
 	if type < 0:
@@ -1941,8 +1994,9 @@ func draw_preview(type: int, box: Rect2) -> void:
 	var s := 28.0
 	var dim_size := Vector2(mx - mn + Vector2i.ONE) * s
 	var origin := box.position + (box.size - dim_size) * 0.5
-	for c in cells:
-		draw_block(origin + Vector2(c - mn) * s, s, type, c.x * 31 + c.y * 17 + type)
+	for k in cells.size():
+		var c: Vector2i = cells[k]
+		draw_block(origin + Vector2(c - mn) * s, s, type, c.x * 31 + c.y * 17 + type, -1, kernels[k] if k < kernels.size() else 0)
 
 
 func _draw_panel() -> void:
@@ -1952,7 +2006,7 @@ func _draw_panel() -> void:
 	_text("TURDTRIS", Vector2(px, 120), 42, tcol)
 
 	_text("NEXT", Vector2(px, 180), 20, scol)
-	draw_preview(next_type if state != State.TITLE else -1, Rect2(px + 40, 192, 190, 100))
+	draw_preview(next_type if state != State.TITLE else -1, Rect2(px + 40, 192, 190, 100), next_corn)
 
 	var y := 352.0
 	var lines_text := str(lines) if game_type == 0 else "%d / %d" % [lines, GOAL]
